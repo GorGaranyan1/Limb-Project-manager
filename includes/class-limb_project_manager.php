@@ -156,6 +156,8 @@ class Limb_project_manager {
 		add_action( 'admin_post_my_form5', array( $this, 'gtp_form_action5' ) );
 		add_action( 'admin_post_nopriv_my_form6', array( $this, 'gtp_form_action6' ) );
 		add_action( 'admin_post_my_form6', array( $this, 'gtp_form_action6' ) );
+        add_action('admin_post_nopriv_my_form7', array($this, 'gtp_form_action7'));
+        add_acion('admin_post_my_form7', array($this, 'gtp_form_action7'));
 	}
 
 	/**
@@ -172,6 +174,9 @@ class Limb_project_manager {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 	}
+    public function gtp_form_action(){
+
+    }
 
 	public function gtp_show_projects_table() {
 		global $wpdb;
