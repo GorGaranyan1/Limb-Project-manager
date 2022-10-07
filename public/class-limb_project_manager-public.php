@@ -51,7 +51,7 @@ class Limb_project_manager_Public {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
+		$this->editProjects();
 	}
 
 	/**
@@ -100,4 +100,16 @@ class Limb_project_manager_Public {
 
 	}
 
+	public function showTasksTable(){
+		require_once ('partials/limb_project_manager-public-showTasks.php');
+	}
+	public function showProjectsTable(){
+		require_once ('partials/limb_project_manager-public-showProjects.php');
+	}
+	public function editProjects(){
+		require_once ('partials/limb_project_manager-public-editTasks.php');
+	}
+	public function editTasks(){
+		require_once('partials/limb_project_manager-public-editProjects.php');
+	}
 }
