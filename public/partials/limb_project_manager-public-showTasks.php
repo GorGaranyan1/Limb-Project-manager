@@ -20,7 +20,7 @@
 			$table_name = $wpdb->prefix . 'g_tasks';
 			$limit      = 10;
 			$offset     = ( $page_number - 1 ) * $limit;
-			$rows       = $wpdb->get_var( "SELECT COUNT(ID FROM $table_name" );
+			$rows       = $wpdb->get_var( "SELECT COUNT(ID) FROM $table_name" );
 			$pages      = ceil( $rows / $limit );
 			$projects   = $wpdb->get_results( "SELECT id, title, description, us_id, project_id FROM $table_name LIMIT $offset, $limit" );
 			foreach ( $projects as $project ) {
