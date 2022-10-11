@@ -106,10 +106,10 @@ class Limb_project_manager_Public {
 	public function showProjectsTable(){
 		require_once ('partials/limb_project_manager-public-showProjects.php');
 	}
-	public function editProjects(){
+	public function editTasks(){
 		require_once ('partials/limb_project_manager-public-editTasks.php');
 	}
-	public function editTasks(){
+	public function editProjects(){
 		require_once('partials/limb_project_manager-public-editProjects.php');
 	}
 }
