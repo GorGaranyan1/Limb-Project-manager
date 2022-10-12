@@ -19,7 +19,7 @@ global $wpdb;
 		$table_name = $wpdb->prefix . 'g_projects';
 		$limit      = 10;
 		$offset     = ( $page_number - 1 ) * $limit;
-		$rows       = $wpdb->get_var( "SELECT COUNT(ID FROM $table_name" );
+		$rows       = $wpdb->get_var( "SELECT COUNT(ID) FROM $table_name" );
 		$pages      = ceil( $rows / $limit );
 		$projects   = $wpdb->get_results( "SELECT id, name, description, us_id, created_at FROM $table_name LIMIT $offset, $limit" );
 		foreach ( $projects as $project ) {
@@ -42,6 +42,7 @@ global $wpdb;
 		?>
         <tr>
             <td colspan="6">
+                <!-- TODO remove form instead add a link to go to add project view -->
                 <button name="add_pr" value="true">Add Project</button>
             </td>
         </tr>
