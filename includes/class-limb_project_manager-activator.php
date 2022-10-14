@@ -40,10 +40,10 @@ class Limb_project_manager_Activator {
 		$db_table_name2 = $wpdb->prefix . 'g_projects';
 		$db_table_name3 = $wpdb->prefix . 'g_tasks_users';
 		$db_table_name4 = $wpdb->prefix . 'g_projects_users';
-		if ( $wpdb->get_var( "SHOW TABLES LIKE '$wpdb->prefix$db_table_name1'" ) != $db_table_name1
-		     && $wpdb->get_var( "SHOW TABLES LIKE '$wpdb->prefix$db_table_name2'" ) != $db_table_name2
-		     && $wpdb->get_var( "SHOW TABLES LIKE '$wpdb->prefix$db_table_name3'" ) != $db_table_name3
-		     && $wpdb->get_var( "SHOW TABLES LIKE '$wpdb->prefix$db_table_name4'" ) != $db_table_name4 ) {
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '$db_table_name1'" ) != $db_table_name1
+		     && $wpdb->get_var( "SHOW TABLES LIKE '$db_table_name2'" ) != $db_table_name2
+		     && $wpdb->get_var( "SHOW TABLES LIKE '$db_table_name3'" ) != $db_table_name3
+		     && $wpdb->get_var( "SHOW TABLES LIKE '$db_table_name4'" ) != $db_table_name4 ) {
 			$charset_collate = $wpdb->get_charset_collate();
 			$sql             = "CREATE TABLE $db_table_name2(
     				id INT(9) NOT NULL AUTO_INCREMENT, 

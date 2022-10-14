@@ -76,6 +76,7 @@ class Limb_project_manager {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_ajax_hooks();
 	}
 
 	/**
@@ -148,32 +149,42 @@ class Limb_project_manager {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
-		add_action( 'admin_post_nopriv_my_form', array( $this, 'editProjects' ) );
-		add_action( 'admin_post_my_form', array( $this, 'editProjects' ) );
+
 		add_action( 'admin_post_nopriv_my_form2', array( $this, 'udpateProjectsData' ) );
 		add_action( 'admin_post_my_form2', array( $this, 'udpateProjectsData' ) );
 		add_action( 'admin_post_nopriv_my_form3', array( $this, 'addProjectData' ) );
 		add_action( 'admin_post_my_form3', array( $this, 'addProjectData' ) );
-		add_action( 'admin_post_nopriv_my_form4', array( $this, 'editTasks' ) );
-		add_action( 'admin_post_my_form4', array( $this, 'editTasks' ) );
+
+
 		add_action( 'admin_post_nopriv_my_form5', array( $this, 'udpateTaskData' ) );
 		add_action( 'admin_post_my_form5', array( $this, 'udpateTaskData' ) );
 		add_action( 'admin_post_nopriv_my_form6', array( $this, 'addTaskData' ) );
-		add_action('admin_post_my_form6', array($this, 'addTaskData'));
-
+		add_action( 'admin_post_my_form6', array( $this, 'addTaskData' ) );
+		add_action( 'init', array( $this, 'create_posttypes' ) );
 	}
 
+	public function create_posttypes() {
+		register_post_type( 'projects', array(
+			'labels'       => array(
+				'name'          => __( 'Projects' ),
+				'singular_name' => __( 'Project' )
+			),
+			'public'       => true,
+			'has_archive'  => true,
+			'rewrite'      => array( 'slug' => 'projects' ),
+			'show_in_rest' => true,
+		) );
 
-
-
-	public function editProjects() {
-		$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
-        $plugin_public->editProjects();
-	}
-
-	public function editTasks() {
-		$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
-		$plugin_public->editTasks();
+		register_post_type('tasks', array(
+			'labels'=>array(
+				'name'=>__('Tasks'),
+				'singular_name'=>__('Task'),
+			),
+			'public'=>true,
+			'has_archive'=>true,
+			'rewrite'=>array('slug'=>'tasks'),
+			'show_in_rest'=>true,
+		));
 	}
 
 	public function udpateTaskData() {
@@ -186,8 +197,12 @@ class Limb_project_manager {
 			$description = sanitize_text_field( $_POST['edit_description'] );
 			$date        = $_POST['edit_project'];
 			$user_id     = $_POST['edit_user'];
-			$wpdb->update( $table_name, array( 'id' => $id, 'title' => $name, 'description' => $description, 'project_id' => $date, 'us_id' => $user_id ), array( 'id' => $id ) );
 			$wpdb->update( $table_name2, array( 'task_id' => $id, 'user_id' => $user_id ), array( 'task_id' => $id ) );
+
+			update_post_meta($id, 'title', $name);
+			update_post_meta($id, 'description', $description);
+			update_post_meta($id, 'project_id', $date);
+			update_post_meta($id, 'user_id', $user_id);
 			$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
 			$plugin_public->showTasksTable();
 		}
@@ -203,8 +218,11 @@ class Limb_project_manager {
 			$description = sanitize_text_field( $_POST['edit_description'] );
 			$date        = sanitize_text_field( $_POST['edit_date'] );
 			$user_id     = $_POST['edit_user'];
-			$wpdb->update( $table_name, array( 'id' => $id, 'name' => $name, 'description' => $description, 'created_at' => $date, 'us_id' => $user_id ), array( 'id' => $id ) );
 			$wpdb->update( $table_name2, array( 'project_id' => $id, 'user_id' => $user_id ), array( 'project_id' => $id ) );
+			update_post_meta($id, 'name', $name);
+			update_post_meta($id, 'description', $description);
+			update_post_meta($id, 'created_at', $date);
+			update_post_meta($id, 'user_id', $user_id);
 			$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
 			$plugin_public->showProjectsTable();
 		}
@@ -215,18 +233,29 @@ class Limb_project_manager {
 		$table_name2 = $wpdb->prefix . 'g_projects_users';
 		$table_name  = $wpdb->prefix . 'g_projects';
 		if ( isset( $_POST['add_data'] ) ) {
-			$id          = $_POST['add_id'];
-			$name        = sanitize_text_field( $_POST['add_name'] );
-			$description = sanitize_text_field( $_POST['add_description'] );
-			$date        = sanitize_text_field( $_POST['add_date'] );
-			$user_id     = $_POST['add_user'];
-			$wpdb->insert( $table_name, array( 'id' => $id, 'name' => $name, 'description' => $description, 'created_at' => $date, 'us_id' => $user_id ) );
-			$wpdb->insert( $table_name2, array( 'project_id' => $id, 'user_id' => $user_id ) );
+			$id                          = $_POST['add_id'];
+			$name                        = sanitize_text_field( $_POST['add_name'] );
+			$description                 = sanitize_text_field( $_POST['add_description'] );
+			$date                        = sanitize_text_field( $_POST['add_date'] );
+			$user_id                     = $_POST['add_user'];
+			$my_project                  = array();
+			$my_project['post_title']    = 'My Project';
+			$my_project['post_content']  = 'This is my project.';
+			$my_project['post_author']   = 1;
+			$my_project['post_status']   = 'publish';
+			$my_project['post_category'] = array( 0 );
+			$my_project['post_type']     = 'project';
+			$id                          = wp_insert_post( $my_project );
+			add_post_meta( $id, 'name', $name );
+			add_post_meta( $id, 'description', $description );
+			add_post_meta( $id, 'created_at', $date );
+			add_post_meta( $id, 'user_id', $user_id );
+			$wpdb->insert($table_name2, array('project_id'=>$id, 'user_id'=>$user_id));
 			$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
 			$plugin_public->showProjectsTable();
 		}
-
 	}
+
 
 	public function addTaskData() {
 		global $wpdb;
@@ -236,13 +265,24 @@ class Limb_project_manager {
 			$id          = $_POST['add_id'];
 			$name        = sanitize_text_field( $_POST['add_title'] );
 			$description = sanitize_text_field( $_POST['add_description'] );
-			$date        = $_POST['add_project'];
+			$project_id        = $_POST['add_project'];
 			$user_id     = $_POST['add_user'];
-			$wpdb->insert( $table_name, array( 'id' => $id, 'title' => $name, 'description' => $description, 'project_id' => $date, 'us_id' => $user_id ) );
-			$wpdb->insert( $table_name2, array( 'task_id' => $id, 'user_id' => $user_id ) );
-			$plugin_public = new Limb_project_manager_Public( $this->get_plugin_name(), $this->get_version() );
-			$plugin_public->showTasksTable();
+			$my_project                  = array();
+			$my_project['post_title']    = 'My Task';
+			$my_project['post_content']  = 'This is my task.';
+			$my_project['post_author']   = 1;
+			$my_project['post_status']   = 'publish';
+			$my_project['post_category'] = array( 0 );
+			$my_project['post_type']='task';
+			$id                          = wp_insert_post( $my_project );
+			add_post_meta( $id, 'title', $name );
+			add_post_meta( $id, 'description', $description );
+			add_post_meta( $id, 'project_id', $project_id );
+			add_post_meta( $id, 'user_id', $user_id );
 		}
+		$wpdb->insert($table_name2, array('task_id'=>$id, 'user_id'=>$user_id));
+		$plugin_public = new Limb_project_manager_Public($this->get_plugin_name(), $this->get_version());
+		$plugin_public->showTasksTable();
 	}
 
 	/**
@@ -259,7 +299,16 @@ class Limb_project_manager {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		add_shortcode( 'show_tasks', array( $plugin_public, 'showTasksTable' ) );
-        add_shortcode('show_projects', array($plugin_public, 'showProjectsTable'));
+		add_shortcode( 'show_projects', array( $plugin_public, 'showProjectsTable' ) );
+	}
+
+	private function define_ajax_hooks(){
+		add_action('wp_head', function(){
+			?>
+			<script> var ajaxurl = "<?php echo get_admin_url()?>/admin-ajax.php"; </script>
+			<?php
+		});
+		add_action('wp_ajax_my_action', array($this, 'my_action'));
 	}
 
 	/**
@@ -280,6 +329,22 @@ class Limb_project_manager {
 	 */
 	public function get_plugin_name() {
 		return $this->plugin_name;
+	}
+
+	public function my_action(){
+		global $wpdb;
+		$arr_ids = $_POST['ids'];
+		$arr_names = $_POST['names'];
+		$arr_desc = $_POST['descriptions'];
+		$arr_users = $_POST['users'];
+		$arr_date = $_POST['date'];
+		for($i = 0; $i < count($arr_ids) - 1; $i++)
+		{
+			update_post_meta($arr_ids[$i], 'name', $arr_names[$i]);
+			update_post_meta($arr_ids[$i], 'description', $arr_desc[$i]);
+			update_post_meta($arr_ids[$i], 'user_id', $arr_users[$i]);
+			update_post_meta($arr_ids[$i], 'created_at', $arr_date[$i]);
+		}
 	}
 
 	/**
